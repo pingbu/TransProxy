@@ -1,0 +1,6 @@
+<script language="javascript"> document.title += " - TransProxy v1.0"; </script>
+<li><a href="./">Home</a></li>
+<li><a href="config.html">Config</a></li>
+<li><a href="tcpconn.html">Connections</a></li>
+<li><a href="dnslog.html">DNS Log</a></li>
+<li><a href="about.html">About</a></li>

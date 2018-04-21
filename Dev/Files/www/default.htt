@@ -1,0 +1,7 @@
+<h1><script language="javascript">
+eval("var Manifest = " + httpQuery("GET", "version.json")); document.write(Manifest.Product + " v" + Manifest.Version);
+</script></h1>
+<table><tr valign="top">
+	<td><script language="javascript"> document.write(httpQuery("GET", "menu.htt")); </script></td>
+	<td>${CONTENT}</td>
+</tr></table>

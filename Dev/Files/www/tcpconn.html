@@ -1,0 +1,32 @@
+<title>TransTCP Connections</title>
+<script language="javascript" src="common.js"></script>
+<script language="javascript" src="head.js"></script>
+<select id="clients" onchange="javascript:location='?client='+this.value"></select>
+<script language="javascript">
+<!--
+
+eval("var r = " + httpQuery("GET", "tcpconn.json" + location.search));
+if (r != null) {
+	if (r.Status != 0) {
+		window.alert(r.Message);
+	} else {
+		for (var i = 0; i < r.Clients.length; ++i)
+			$("clients").add(new Option(r.Clients[i]));
+		$("clients").value = r.CurrentClient;
+		document.write("<table border=\"1\" bordercolor=\"lightgrey\" style=\"border-collapse: collapse\">");
+		for (var i = 0; i < r.Connections.length; ++i) {
+			var Conn = r.Connections[i];
+			document.write("<tr>");
+			document.write("<td>" + Conn.Server + "</td>");
+			document.write("<td>" + Conn.UpBytes + "/" + Conn.DownBytes + "</td>");
+			document.write("<td>" + Conn.ConnTime + "</td>");
+			document.write("<td>" + Conn.State + "</td>");
+			document.write("</tr>");
+		}
+		document.write("</table>");
+	}
+}
+
+//-->
+</script>
+<script language="javascript" src="tail.js"></script>

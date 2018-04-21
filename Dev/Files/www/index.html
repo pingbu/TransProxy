@@ -1,0 +1,29 @@
+<title>Home</title>
+<script language="javascript" src="common.js"></script>
+<script language="javascript" src="head.js"></script>
+<table>
+<tr><td><b>Run Duration:</b></td><td id="RunDuration"></td></tr>
+<tr><td><b>Resolve Count:</b></td><td><span id="ResolveCount"></span></td></tr>
+<tr><td><b>Connections:</b></td><td><span id="ConnectionCount"></span>/<span id="MaxConnectionCount"></span></td></tr>
+<tr><td><b>Transfered:</b></td><td><span id="TotalUpData"></span>/<span id="TotalDownData"></span></td></tr>
+</table>
+<script language="javascript">
+<!--
+
+eval("var r = " + httpQuery("GET", "status.json"));
+if (r != null) {
+	if (r.Status != 0) {
+		window.alert(r.Message);
+	} else {
+		$("RunDuration").innerText = r.RunDuration;
+		$("ResolveCount").innerText = r.ResolveCount;
+		$("ConnectionCount").innerText = r.ConnectionCount;
+		$("MaxConnectionCount").innerText = r.MaxConnectionCount;
+		$("TotalUpData").innerText = r.TotalUpData;
+		$("TotalDownData").innerText = r.TotalDownData;
+	}
+}
+
+//-->
+</script>
+<script language="javascript" src="tail.js"></script>

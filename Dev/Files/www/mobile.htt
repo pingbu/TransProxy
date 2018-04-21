@@ -1,0 +1,26 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script language="javascript">
+<!--
+
+	var MenuPanelVisible = false;
+
+	function toggleMenuPanel() {
+		MenuPanelVisible = !MenuPanelVisible;
+		$("MenuPanel").style.display = MenuPanelVisible ? "" : "none";
+	}
+
+//-->
+</script>
+<table>
+	<tr style="font-size: 24px; font-weight: bold">
+		<th width="24px" onclick="javascript:toggleMenuPanel()" style="border: solid 1px black">=</th>
+		<td>TransProxy v1.0</td>
+	</tr>
+	<tr><td colspan="2">
+		<div id="MenuPanel" style="position: absolute; display: none; border: solid 1px black; background-color: lightgrey; padding: 8px">
+			<script language="javascript"> document.write(httpQuery("GET", "menu.htt")); </script>
+		</div>
+		&nbsp;
+	</td></tr>
+	<tr><td colspan="2">${CONTENT}</td></tr>
+</table>

@@ -1,0 +1,253 @@
+<style>
+<!--
+	.full_width { width: 100% }
+	.input_ip { width: 160px }
+	.input_port { width: 80px }
+	.input_url { width: 100% }
+	.valid { color: red }
+//-->
+</style>
+<script language="javascript" src="common.js"></script>
+<div id="RebootingDlg" style="position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: none">
+	<div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: black; opacity: .5"></div>
+	<table cellpadding="0" ceilspacing="0" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"><tr><td align="center" valign="middle"><div style="width: 200px; background-color: lightgrey; border: solid 1px black; padding: 10px">Rebooting... <span id="TimeCount">30</span></div></td></tr></table>
+</div>
+<script language="javascript" src="head.js"></script>
+<table>
+	<tr><td colspan="2"><b>Proxy Settings</b></td></tr>
+	<tr><td>Proxy Protocol:</td><td>
+		<input type="radio" name="ProxyProtocol" id="ProxyProtocolHTTP" value="http"><label for="ProxyProtocolHTTP">HTTP</label>
+		<input type="radio" name="ProxyProtocol" id="ProxyProtocolSock5" value="sock5"><label for="ProxyProtocolSock5">Sock5</label>
+	</td></tr>
+	<tr><td>Proxy Server:</td><td><input type="text" id="ProxyServer" class="input_ip"></td></tr>
+	<tr><td>Proxy Port:</td><td><input type="text" id="ProxyPort" class="input_port"></td></tr>
+	<tr><td>Up DNS:</td><td><input type="text" id="UpDns" class="input_ip"></td></tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td colspan="2"><b>Rules Settings</b></td></tr>
+	<tr><td>Update URL:</td><td><input type="text" id="RulesURL" class="input_url"></td></tr>
+	<tr><td>Format:</td><td>
+		<input type="radio" name="RulesFormat" id="RulesFormatPlain" value=""><label for="RulesFormatPlain">Plain</label>
+		<input type="radio" name="RulesFormat" id="RulesFormatBase64" value="Base64"><label for="RulesFormatBase64">Base64</label>
+	</td></tr>
+	<tr valign="top"><td>Status:</td><td>
+		<span id="RulesStatus"></span>
+		<input type="button" id="UpdateRules" onclick="javascript:updateRules()">
+	</td></tr>
+	<tr valign="top"><td>Force Proxy:</td><td><textarea rows="8" id="CustomProxyList" class="full_width"></textarea></td></tr>
+	<tr valign="top"><td>Force Direct:</td><td><textarea rows="8" id="CustomDirectList" class="full_width"></textarea></td></tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td colspan="2"><b>Network Settings</b></td></tr>
+	<tr><td>Network Type:</td><td>
+		<input type="radio" name="NetworkType" id="NetworkType10" value="10"><label for="NetworkType10">10.x.x.x</label>
+		<input type="radio" name="NetworkType" id="NetworkType100" value="100"><label for="NetworkType100">100.x.x.x</label>
+		<input type="radio" name="NetworkType" id="NetworkType0" value="0"><label for="NetworkType0">Custom</label>
+	</td></tr>
+	<tr><td>Network Mask:</td><td><input type="text" id="Mask" class="input_ip group_network"></td></tr>
+	<tr><td>Client IP:</td><td><input type="text" id="ClientIP" class="input_ip group_network"></td></tr>
+	<tr><td>Server IP:</td><td><input type="text" id="ServerIP" class="input_ip group_network"></td></tr>
+	<tr><td>Virtual IP:</td><td><input type="text" id="VipMin" class="input_ip group_network">-<input type="text" id="VipMax" class="input_ip group_network"></td></tr>
+	<tr><td>Agent IP:</td><td><input type="text" id="AgentMin" class="input_ip group_network">-<input type="text" id="AgentMax" class="input_ip group_network"></td></tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td colspan="2" align="right"><input type="button" value="Save" id="Save" onclick="javascript:onSave()" disabled></td></tr>
+</table>
+<script language="javascript" src="tail.js"></script>
+<script language="javascript">
+<!--
+
+var Network10 = { Mask: "255.0.0.0", ClientIP: "10.0.0.1", ServerIP: "10.10.10.10", VipMin: "10.128.0.1", VipMax: "10.255.255.254", AgentMin: "10.100.0.1", AgentMax: "10.127.255.255" };
+var Network100 = { Mask: "255.192.0.0", ClientIP: "100.64.0.1", ServerIP: "100.100.100.100", VipMin: "100.101.0.1", VipMax: "100.127.255.255", AgentMin: "100.72.0.1", AgentMax: "100.99.255.255" };
+var NetworkCustom;
+
+function setNetworkValues(values) {
+	var inputs = document.getElementsByTagName("input");
+	for (var i = 0; i < inputs.length; ++i)
+		if ((" " + inputs[i].className + " ").indexOf(" group_network ") >= 0)
+			inputs[i].value = values[inputs[i].id];
+}
+
+function setNetworkEnabled(enabled) {
+	var inputs = document.getElementsByTagName("input");
+	for (var i = 0; i < inputs.length; ++i)
+		if ((" " + inputs[i].className + " ").indexOf(" group_network ") >= 0)
+			inputs[i].disabled = !enabled;
+}
+
+function selectNetworkType(type) {
+	$("NetworkType" + type).checked = true;
+	if (type == 0)
+		setNetworkValues(NetworkCustom);
+	else if (type == 10)
+		setNetworkValues(Network10);
+	else
+		setNetworkValues(Network100);
+	setNetworkEnabled(type == 0);
+}
+
+function isValid() {
+	var spans = document.getElementsByTagName("span");
+	for (var i = 0; i < spans.length; ++i)
+		if ((" " + spans[i].className + " ").indexOf(" valid ") >= 0 && spans[i].style.display != "none")
+			return false;
+	return true;
+}
+
+function checkValid() { $("Save").disabled = !isValid(); }
+function checkValidIP(id) { $(id + "Valid").style.display = isValidIP($(id).value) ? "none" : ""; checkValid(); }
+function checkValidPort(id) { $(id + "Valid").style.display = isValidPort($(id).value) ? "none" : ""; checkValid(); }
+function checkValidURL(id) { $(id + "Valid").style.display = isValidURL($(id).value) ? "none" : ""; checkValid(); }
+
+function attachCheckIP(id) {
+	$(id).onchange = function() { checkValidIP(id); };
+}
+function attachCheckPort(id) {
+	$(id).onchange = function() { checkValidPort(id); };
+}
+function attachCheckURL(id) {
+	$(id).onchange = function() { checkValidURL(id); };
+}
+
+var inputs = document.getElementsByTagName("input");
+for (var i = 0; i < inputs.length; ++i) {
+	if (inputs[i].type == "radio") {
+		inputs[i].onclick = checkValid;
+	} else if (inputs[i].type == "text") {
+		inputs[i].onchange = checkValid;
+		var elementClasses = " " + inputs[i].className + " ";
+		if (elementClasses.indexOf(" input_") >= 0) {
+			var id = inputs[i].id;
+			var e = document.createElement("span");
+			e.id = id + "Valid";
+			e.style.display = "none";
+			e.className = "valid";
+			e.innerHTML = "Invalid";
+			var next = inputs[i].nextSibling;
+			if (next != null)
+				inputs[i].parentNode.insertBefore(e, next);
+			else
+				inputs[i].parentNode.appendChild(e);
+			if (elementClasses.indexOf(" input_ip ") >= 0)
+				attachCheckIP(id);
+			else if (elementClasses.indexOf(" input_port ") >= 0)
+				attachCheckPort(id);
+			else if (elementClasses.indexOf(" input_url ") >= 0)
+				attachCheckURL(id);
+		}
+	}
+}
+
+var textareas = document.getElementsByTagName("textarea");
+for (var i = 0; i < textareas.length; ++i)
+	textareas[i].onchange = checkValid;
+
+$("NetworkType10").onclick = function() { selectNetworkType(10); checkValid(); }
+$("NetworkType100").onclick = function() { selectNetworkType(100); checkValid(); }
+$("NetworkType0").onclick = function() { selectNetworkType(0); checkValid(); }
+$("Mask").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.mask = $("Mask").value; checkValidIP("Mask"); } }
+$("ClientIP").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.client_ip = $("ClientIP").value; checkValidIP("ClientIP"); } }
+$("ServerIP").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.server_ip = $("ServerIP").value; checkValidIP("ServerIP"); } }
+$("VipMin").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.vip_min = $("VipMin").value; checkValidIP("VipMin"); } }
+$("VipMax").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.vip_max = $("VipMax").value; checkValidIP("VipMax"); } }
+$("AgentMin").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.agent_min = $("AgentMin").value; checkValidIP("AgentMin"); } }
+$("AgentMax").onchange = function() { if ($("NetworkType0").checked) { NetworkCustom.agent_max = $("AgentMax").value; checkValidIP("AgentMax"); } }
+
+eval("var r = " + httpQuery("GET", "config.json"));
+var Proxy = parseUrl(r.Proxy);
+if (Proxy.protocol == $("ProxyProtocolSock5").value)
+	$("ProxyProtocolSock5").checked = true;
+else
+	$("ProxyProtocolHTTP").checked = true;
+$("ProxyServer").value = Proxy.host;
+$("ProxyPort").value = Proxy.port;
+$("UpDns").value = r.UpDNS.substring(r.UpDNS.indexOf("://") + 3);
+$("RulesURL").value = r.RulesURL;
+if (r.RulesFormat == $("RulesFormatBase64").value)
+	$("RulesFormatBase64").checked = true;
+else
+	$("RulesFormatPlain").checked = true;
+$("CustomProxyList").value = r.CustomProxyList;
+$("CustomDirectList").value = r.CustomDirectList;
+NetworkCustom = r.NetworkCustom;
+selectNetworkType(r.NetworkType);
+
+var updatingRules = false;
+updateRulesFileState();
+
+var rebootPrompt;
+function queryReboot() {
+	if (window.confirm(rebootPrompt)) {
+		eval("var r = " + httpQuery("GET", "reboot.json"));
+		if (r.Status != 0) {
+			window.alert(r.Message);
+		} else {
+			$("RebootingDlg").style.display = "";
+			setTimeout(onTimeCount, 1000);
+		}
+	}
+}
+
+function updateRulesFileState() {
+	eval("var r = " + httpQuery("GET", "config-update-rules-file-check.json"));
+	$("RulesStatus").innerHTML = r.LastUpdate;
+	if (r.Updating) {
+		$("UpdateRules").value = "Updating";
+		$("UpdateRules").disabled = true;
+		window.setTimeout(updateRulesFileState, 1000);
+	} else {
+		$("UpdateRules").value = "Update Now";
+		$("UpdateRules").disabled = false;
+		if (updatingRules) {
+			updatingRules = false;
+			rebootPrompt = "Rules updated, reboot to apply it now?";
+			window.setTimeout(queryReboot, 1);
+		}
+	}
+}
+
+function updateRules() {
+	updatingRules = true;
+	httpQuery("GET", "config-update-rules-file-start.json");
+	updateRulesFileState();
+}
+
+function onSave() {
+	var ProxyProtocol = null, RulesFormat = null, NetworkType = null;
+	var inputs = document.getElementsByTagName("input");
+	for (var i = 0; i < inputs.length; ++i)
+		if (inputs[i].name == "ProxyProtocol" && inputs[i].checked)
+			ProxyProtocol = inputs[i].value;
+		else if (inputs[i].name == "RulesFormat" && inputs[i].checked)
+			RulesFormat = inputs[i].value;
+		else if (inputs[i].name == "NetworkType" && inputs[i].checked)
+			NetworkType = parseInt(inputs[i].value);
+	var data = {
+		Proxy: ProxyProtocol + "://" + $("ProxyServer").value + ":" + $("ProxyPort").value,
+		UpDNS: "udp://" + $("UpDns").value,
+		RulesURL: $("RulesURL").value,
+		RulesFormat: RulesFormat,
+		CustomProxyList: $("CustomProxyList").value,
+		CustomDirectList: $("CustomDirectList").value,
+		NetworkType: NetworkType,
+		NetworkCustom: NetworkCustom };
+	console.log(JSON.stringify(data));
+	eval("var r = " + httpQuery("POST", "config-save.json", JSON.stringify(data)));
+	if (r.Status != 0) {
+		window.alert(r.Message);
+	} else {
+		$("Save").disabled = true;
+		rebootPrompt = "Config saved, reboot to apply them now?";
+		window.setTimeout(queryReboot, 1);
+	}
+}
+
+function onTimeCount() {
+	var t = parseInt($("TimeCount").innerText) - 1;
+	$("TimeCount").innerText = t;
+	if (t > 0) {
+		setTimeout(onTimeCount, 1000);
+	} else {
+		location.reload();
+	}
+}
+
+//-->
+</script>

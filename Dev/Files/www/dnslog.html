@@ -1,0 +1,31 @@
+<title>DNS Log</title>
+<script language="javascript" src="common.js"></script>
+<script language="javascript" src="head.js"></script>
+<select id="clients" onchange="javascript:location='?client='+this.value"></select>
+<script language="javascript">
+<!--
+
+eval("var r = " + httpQuery("GET", "dnslog.json" + location.search));
+if (r != null) {
+	if (r.Status != 0) {
+		window.alert(r.Message);
+	} else {
+		for (var i = 0; i < r.Clients.length; ++i)
+			$("clients").add(new Option(r.Clients[i]));
+		$("clients").value = r.CurrentClient;
+		document.write("<table border=\"1\" bordercolor=\"lightgrey\" style=\"border-collapse: collapse\">");
+		for (var i = 0; i < r.Logs.length; ++i) {
+			var Log = r.Logs[i];
+			document.write("<tr>");
+			document.write("<td>" + Log.Time + "</td>");
+			document.write("<td>" + Log.Host + "</td>");
+			document.write("<td>" + (Log.IP ? Log.IP : "-") + "</td>");
+			document.write("</tr>");
+		}
+		document.write("</table>");
+	}
+}
+
+//-->
+</script>
+<script language="javascript" src="tail.js"></script>

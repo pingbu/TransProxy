@@ -1,0 +1,9 @@
+Package: transproxy
+Version: 1.0
+License: GNU Lesser General Public License Version 3.0
+Architecture: mipselsf
+Depends: libc librt libstdcpp libpthread libopenssl
+Priority: optional
+Section: net
+Maintainer: Ping Bu <pingbu1980@gmail.com>
+Description: Auto route to proxy server partially according to domain.
