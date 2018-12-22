@@ -143,9 +143,13 @@ uint32_t DomainResolver::dns(uint32_t client, const char* hostname) THROWS {
 const char* DomainResolver::ddns(uint32_t ip) THROWS {
 	const char* hostname = NULL;
 	ResolvItem* host = *_ipToName.get(ip);
-	if (host)
+	if (host) {
 		hostname = host->name;
-	Utils::Log::d("%s <-- ddns %s", hostname, Net::IPv4::ntoa(ip));
+		Utils::Log::d("%s <-- ddns %s", hostname, Net::IPv4::ntoa(ip));
+	} else if (!Net::IPv4::isLanIP(ip)) {
+		hostname = Net::IPv4::ntoa(ip);
+		Utils::Log::d("%s <-- ddns %s", hostname, hostname);
+	}
 	return hostname;
 }
 

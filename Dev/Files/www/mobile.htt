@@ -14,7 +14,7 @@
 <table>
 	<tr style="font-size: 24px; font-weight: bold">
 		<th width="24px" onclick="javascript:toggleMenuPanel()" style="border: solid 1px black">=</th>
-		<td>TransProxy v1.0</td>
+		<td>TransProxy v1.0.1</td>
 	</tr>
 	<tr><td colspan="2">
 		<div id="MenuPanel" style="position: absolute; display: none; border: solid 1px black; background-color: lightgrey; padding: 8px">

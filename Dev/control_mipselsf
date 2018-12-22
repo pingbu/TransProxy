@@ -1,5 +1,5 @@
 Package: transproxy
-Version: 1.0
+Version: 1.0.1
 License: GNU Lesser General Public License Version 3.0
 Architecture: mipselsf
 Depends: libc librt libstdcpp libpthread libopenssl

@@ -23,6 +23,13 @@ static inline const char* ntoa(uint32_t ip) {
 	return ::inet_ntoa(ia);
 }
 
+static inline bool isLanIP(uint32_t ip) {
+	return (ip & 0xFF000000) == 0x0A000000 // 10.0.0.0 mask 255.0.0.0
+	|| (ip & 0xFFC00000) == 0x64400000 // 100.64.0.0 mask 255.192.0.0
+	|| (ip & 0xFFF00000) == 0xAC100000 // 172.16.0.0 mask 255.240.0.0
+	|| (ip & 0xFFFF0000) == 0xC0A80000; // 192.168.0.0 mask 255.255.0.0
+}
+
 struct SockAddr {
 	uint32_t ip;
 	uint16_t port;

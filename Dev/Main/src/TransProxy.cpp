@@ -24,7 +24,7 @@
 using namespace TransProxy;
 
 static const char* PRODUCT = "TransProxy";
-static const char* VERSION = "1.0";
+static const char* VERSION = "1.0.1";
 static int REVISION = 1;
 
 static Utils::String getExeDir() {
@@ -97,12 +97,12 @@ static Config config(getExeDir());
 static void showBanner() {
 	::fprintf(stderr, "\033[0m"
 			"============================================================\n"
-			" TransProxy v1.0\n"
+			" TransProxy v%s\n"
 			"------------------------------------------------------------\n"
 			" Service DNS: %s\n"
 			" Manager URL: http://transproxy.cn/\n"
 			"============================================================\n",
-			config.getServerIP());
+			VERSION, config.getServerIP());
 }
 
 static void run() THROWS {
